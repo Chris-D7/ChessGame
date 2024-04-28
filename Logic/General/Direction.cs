@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ChessGame.Logic.General
+﻿namespace ChessGame.Logic.General
 {
     public class Direction
     {

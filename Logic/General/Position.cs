@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace ChessGame.Logic.General
 {
@@ -20,7 +15,7 @@ namespace ChessGame.Logic.General
 
         public Player SquareColor()
         {
-            if((Row + Column) % 2 == 0)
+            if ((Row + Column) % 2 == 0)
             {
                 return Player.White;
             }
@@ -54,7 +49,7 @@ namespace ChessGame.Logic.General
 
         public static Position operator +(Position pos, Direction dir)
         {
-            return new Position(pos.Row+dir.RowOffset, pos.Column+dir.ColumnOffset);
+            return new Position(pos.Row + dir.RowOffset, pos.Column + dir.ColumnOffset);
         }
     }
 }

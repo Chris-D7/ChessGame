@@ -1,19 +1,22 @@
 ﻿using ChessGame.Logic.General;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ChessGame.Logic.Pieces
 {
 
-    public abstract class Piece
+    public abstract class Piece : PictureBox
     {
-        
+        public abstract Position Position { get; set; }
         public abstract Player Color { get; }
-        public abstract PictureBox PictureBox { get; }
         public bool Moved { get; set; } = false;
+        public bool Active { get; set; } = false;
+        public Board board;
+
+        public Piece(Board board)
+        {
+            this.Size = new System.Drawing.Size(80, 80);
+            this.Location = new System.Drawing.Point(0, 0);
+            this.board = board;
+        }
     }
 }

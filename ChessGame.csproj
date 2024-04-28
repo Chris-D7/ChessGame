@@ -58,7 +58,30 @@
     <Compile Include="Logic\General\Direction.cs" />
     <Compile Include="Logic\General\Player.cs" />
     <Compile Include="Logic\General\Position.cs" />
-    <Compile Include="Logic\Pieces\Piece.cs" />
+    <Compile Include="Logic\General\Square.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Logic\Pieces\Bishop.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Logic\Pieces\King.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Logic\Pieces\Knight.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Logic\Pieces\Pawn.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Logic\Pieces\Piece.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Logic\Pieces\Queen.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Logic\Pieces\Rook.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Chess.resx">
