@@ -52,9 +52,13 @@
     <Compile Include="Chess.Designer.cs">
       <DependentUpon>Chess.cs</DependentUpon>
     </Compile>
+    <Compile Include="Logic\General\Board.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Logic\General\Direction.cs" />
     <Compile Include="Logic\General\Player.cs" />
     <Compile Include="Logic\General\Position.cs" />
+    <Compile Include="Logic\Pieces\Piece.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Chess.resx">
@@ -68,6 +72,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

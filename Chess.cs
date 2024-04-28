@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ChessGame.Logic.General;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -15,6 +16,7 @@ namespace ChessGame
         public Chess()
         {
             InitializeComponent();
+            this.Controls.Add(new Board());
         }
     }
 }
