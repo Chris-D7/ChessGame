@@ -52,5 +52,9 @@ namespace ChessGame.Logic.General
             return !(left == right);
         }
 
+        public static Position operator +(Position pos, Direction dir)
+        {
+            return new Position(pos.Row+dir.RowOffset, pos.Column+dir.ColumnOffset);
+        }
     }
 }
