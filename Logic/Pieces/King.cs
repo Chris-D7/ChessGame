@@ -37,9 +37,5 @@ namespace ChessGame.Logic.Pieces
             throw new NotImplementedException();
         }
 
-        public override void PrintAttack()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

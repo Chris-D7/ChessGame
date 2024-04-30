@@ -34,7 +34,7 @@ namespace ChessGame.Logic.Pieces
             Square square = piece.board.GetSquare(position);
             square.BackColor = Board.SELECTED_COLOR;
             piece.PrintMove();
-            piece.PrintAttack();
+            ((Pawn)piece).PrintAttack();
         }
 
         public override void PrintMove()
@@ -55,7 +55,7 @@ namespace ChessGame.Logic.Pieces
             }
         }
 
-        public override void PrintAttack()
+        public void PrintAttack()
         {
             Direction directionRight, directionLeft;
             if (face == Direction.Up)

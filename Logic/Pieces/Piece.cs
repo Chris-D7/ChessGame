@@ -27,11 +27,6 @@ namespace ChessGame.Logic.Pieces
 
         public abstract void PrintMove();
 
-        public virtual void PrintAttack()
-        {
-            Console.WriteLine("########### Piece PrintAttack ###########");
-        }
-
         public abstract void ClickOn(object sender, EventArgs e);
 
     }
