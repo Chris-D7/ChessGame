@@ -1,7 +1,4 @@
 ﻿using ChessGame.Logic.General;
-using System;
-using System.Drawing;
-using System.Security.Cryptography.X509Certificates;
 
 namespace ChessGame.Logic.Pieces
 {
@@ -52,11 +49,8 @@ namespace ChessGame.Logic.Pieces
                     {
                         break;
                     }
-                    if (square != null)
-                    {
-                        square.BackColor = Board.MOVE_COLOR;
-                        board.SetGreenSquareClick(square);
-                    }
+                    square.BackColor = Board.MOVE_COLOR;
+                    board.SetGreenSquareClick(square);
                 }
             }
         }
@@ -64,18 +58,15 @@ namespace ChessGame.Logic.Pieces
         public override void PrintAttack()
         {
             Direction directionRight, directionLeft;
-            Player type;
             if (face == Direction.Up)
             {
                 directionRight = Direction.UpRight;
                 directionLeft = Direction.UpLeft;
-                type = Player.Black;
             }
             else
             {
                 directionRight = Direction.DownRight;
                 directionLeft = Direction.DownLeft;
-                type = Player.White;
             }
             Position positionRight = this.Position + directionRight;
             Position positionLeft = this.Position + directionLeft;
@@ -85,7 +76,7 @@ namespace ChessGame.Logic.Pieces
             if (squareLeft != null && squareLeft.Controls.Count > 0)
             {
                 Piece attack = board.GetPiece(positionLeft);
-                if (attack != null &&  attack.Color == type)
+                if (attack != null && attack.Color != this.Color)
                 {
                     squareLeft.BackColor = Board.ATTACK_COLOR;
                     attack.Attack = true;
@@ -96,7 +87,7 @@ namespace ChessGame.Logic.Pieces
             if (squareRight != null && squareRight.Controls.Count > 0)
             {
                 Piece attack = board.GetPiece(positionRight);
-                if (attack != null && attack.Color == type)
+                if (attack != null && attack.Color != this.Color)
                 {
                     squareRight.BackColor = Board.ATTACK_COLOR;
                     attack.Attack = true;

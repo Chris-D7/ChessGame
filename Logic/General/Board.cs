@@ -1,9 +1,7 @@
 ﻿using ChessGame.Logic.Pieces;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.Drawing;
-using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 
 namespace ChessGame.Logic.General
@@ -83,7 +81,7 @@ namespace ChessGame.Logic.General
 
         private void Initialize()
         {
-            squares.ForEach( sq => { sq.Controls.Clear(); } );
+            squares.ForEach(sq => { sq.Controls.Clear(); });
             foreach (Piece piece in pieces)
             {
                 foreach (Square square in squares)
@@ -176,9 +174,9 @@ namespace ChessGame.Logic.General
 
         public Piece GetPiece(Position position)
         {
-            foreach(Piece piece in pieces)
+            foreach (Piece piece in pieces)
             {
-                if(piece.Position == position)
+                if (piece.Position == position)
                 {
                     return piece;
                 }
@@ -186,7 +184,7 @@ namespace ChessGame.Logic.General
             return null;
         }
 
-        public List<Piece> GetAttackedPieces() 
+        public List<Piece> GetAttackedPieces()
         {
             List<Piece> attacked = new List<Piece>();
             foreach (Piece piece in pieces)
@@ -215,6 +213,7 @@ namespace ChessGame.Logic.General
                 attackedSquare.Controls.Remove(attackedPiece);
                 activeSquare.Controls.Remove(activePiece);
                 attackedSquare.Controls.Add(activePiece);
+                activePiece.Moved = true;
                 activePosition = null;
             }
             BoardDrawing();

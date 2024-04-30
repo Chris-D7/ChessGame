@@ -1,6 +1,5 @@
 ﻿using ChessGame.Logic.General;
 using System;
-using System.Runtime.Remoting.Channels;
 using System.Windows.Forms;
 
 namespace ChessGame.Logic.Pieces
@@ -28,7 +27,10 @@ namespace ChessGame.Logic.Pieces
 
         public abstract void PrintMove();
 
-        public abstract void PrintAttack();
+        public virtual void PrintAttack()
+        {
+            Console.WriteLine("########### Piece PrintAttack ###########");
+        }
 
         public abstract void ClickOn(object sender, EventArgs e);
 
