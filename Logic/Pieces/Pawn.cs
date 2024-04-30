@@ -1,6 +1,7 @@
 ﻿using ChessGame.Logic.General;
-using System.Runtime.CompilerServices;
-using System.Windows.Forms;
+using System;
+using System.Drawing;
+using System.Security.Cryptography.X509Certificates;
 
 namespace ChessGame.Logic.Pieces
 {
@@ -27,98 +28,82 @@ namespace ChessGame.Logic.Pieces
             this.Click += ClickOn;
         }
 
-        public void ClickOn(object sender, System.EventArgs e)
+        public override void ClickOn(object sender, System.EventArgs e)
         {
-            board.BoardDrawing();
-            int i;
-            if (Moved) { i = 2; }
-            else { i = 3; }
-            foreach (Square square in board.squares)
+            Piece piece = (Piece)sender;
+            piece.board.BoardDrawing();
+            Position position = piece.Position;
+            piece.board.SetActivePosition(position);
+            Square square = piece.board.GetSquare(position);
+            square.BackColor = Board.SELECTED_COLOR;
+            piece.PrintMove();
+            piece.PrintAttack();
+        }
+
+        public override void PrintMove()
+        {
+            int i = Moved ? 2 : 3;
+            for (int k = 1; k < i; k++)
             {
-                if (square.Position == Position)
+                Square square = board.GetSquare(this.Position + (k * face));
+                if (square != null)
                 {
-                    square.BackColor = Board.SELECTED_COLOR;
+                    if (square.Controls.Count > 0)
+                    {
+                        break;
+                    }
+                    if (square != null)
+                    {
+                        square.BackColor = Board.MOVE_COLOR;
+                        board.SetGreenSquareClick(square);
+                    }
                 }
             }
+        }
+
+        public override void PrintAttack()
+        {
+            Direction directionRight, directionLeft;
+            Player type;
             if (face == Direction.Up)
             {
-                Square square;
-                for (int k = 1; k < i; k++)
-                {
-                    square = board.getSquare(this.Position + new Direction(0, -k));
-                    if (square.Controls.Count > 0)
-                    {
-                        break;
-                    }
-                    if (square != null)
-                    {
-                        square.BackColor = Board.MOVE_COLOR;
-                        board.SetGreenSquareClick(square);
-                    }
-                }
-                square = board.getSquare(this.Position + new Direction(1, -1));
-                if (square != null)
-                {
-                    if (square.Controls.Count > 0)
-                    {
-                        if (((Piece)square.Controls[0]).Color == Player.Black)
-                        {
-                            square.BackColor = Board.ATTACK_COLOR;
-                        }
-                    }
-                }
-                square = board.getSquare(this.Position + new Direction(-1, -1));
-                if(square != null)
-                {
-                    if (square.Controls.Count > 0)
-                    {
-                        if (((Piece)square.Controls[0]).Color == Player.Black)
-                        {
-                            square.BackColor = Board.ATTACK_COLOR;
-                        }
-                    }
-                }
+                directionRight = Direction.UpRight;
+                directionLeft = Direction.UpLeft;
+                type = Player.Black;
             }
-            if (face == Direction.Down)
+            else
             {
-                Square square;
-                for (int k = 1; k < i; k++)
+                directionRight = Direction.DownRight;
+                directionLeft = Direction.DownLeft;
+                type = Player.White;
+            }
+            Position positionRight = this.Position + directionRight;
+            Position positionLeft = this.Position + directionLeft;
+            Square squareRight = board.GetSquare(positionRight);
+            Square squareLeft = board.GetSquare(positionLeft);
+
+            if (squareLeft != null && squareLeft.Controls.Count > 0)
+            {
+                Piece attack = board.GetPiece(positionLeft);
+                if (attack != null &&  attack.Color == type)
                 {
-                    square = board.getSquare(this.Position + new Direction(0, k));
-                    if (square.Controls.Count > 0)
-                    {
-                        break;
-                    }
-                    if (square != null)
-                    {
-                        square.BackColor = Board.MOVE_COLOR;
-                        board.SetGreenSquareClick(square);
-                    }
-                }
-                square = board.getSquare(this.Position + new Direction(1, 1));
-                if(square != null)
-                {
-                    if (square.Controls.Count > 0)
-                    {
-                        if (((Piece)square.Controls[0]).Color == Player.White)
-                        {
-                            square.BackColor = Board.ATTACK_COLOR;
-                        }
-                    }
-                }
-                square = board.getSquare(this.Position + new Direction(-1, 1));
-                if (square != null)
-                {
-                    if (square.Controls.Count > 0)
-                    {
-                        if (((Piece)square.Controls[0]).Color == Player.White)
-                        {
-                            square.BackColor = Board.ATTACK_COLOR;
-                        }
-                    }
+                    squareLeft.BackColor = Board.ATTACK_COLOR;
+                    attack.Attack = true;
+                    attack.Click -= attack.ClickOn;
+                    attack.Click += attack.AttackClick;
                 }
             }
-            Active = true;
+            if (squareRight != null && squareRight.Controls.Count > 0)
+            {
+                Piece attack = board.GetPiece(positionRight);
+                if (attack != null && attack.Color == type)
+                {
+                    squareRight.BackColor = Board.ATTACK_COLOR;
+                    attack.Attack = true;
+                    attack.Click -= attack.ClickOn;
+                    attack.Click += attack.AttackClick;
+                }
+            }
         }
     }
 }

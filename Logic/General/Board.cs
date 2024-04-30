@@ -1,7 +1,9 @@
 ﻿using ChessGame.Logic.Pieces;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Drawing;
-using System.Runtime.Remoting.Messaging;
+using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 
 namespace ChessGame.Logic.General
@@ -14,7 +16,9 @@ namespace ChessGame.Logic.General
         public static readonly Color MOVE_COLOR = Color.LightGreen;
         public static readonly Color SELECTED_COLOR = Color.Green;
         public List<Piece> pieces = new List<Piece>();
-        public List<Square> squares {  get; set; }
+        public List<Piece> removedPieces = new List<Piece>();
+        public List<Square> squares { get; set; }
+        private Position activePosition;
         public Board()
         {
             squares = new List<Square>();
@@ -46,39 +50,40 @@ namespace ChessGame.Logic.General
         private void AddPieces()
         {
             Player color = Player.Black;
-            int row = 0;
-            pieces.Add(new Rook(color, new Position(0, row), this));
-            pieces.Add(new Knight(color, new Position(1, row), this));
-            pieces.Add(new Bishop(color, new Position(2, row), this));
-            pieces.Add(new Queen(color, new Position(3, row), this));
-            pieces.Add(new King(color, new Position(4, row), this));
-            pieces.Add(new Bishop(color, new Position(5, row), this));
-            pieces.Add(new Knight(color, new Position(6, row), this));
-            pieces.Add(new Rook(color, new Position(7, row), this));
-            row++;
+            int col = 0;
+            pieces.Add(new Rook(color, new Position(0, col), this));
+            pieces.Add(new Knight(color, new Position(1, col), this));
+            pieces.Add(new Bishop(color, new Position(2, col), this));
+            pieces.Add(new Queen(color, new Position(3, col), this));
+            pieces.Add(new King(color, new Position(4, col), this));
+            pieces.Add(new Bishop(color, new Position(5, col), this));
+            pieces.Add(new Knight(color, new Position(6, col), this));
+            pieces.Add(new Rook(color, new Position(7, col), this));
+            col++;
             for (int i = 0; i < 8; i++)
             {
-                pieces.Add(new Pawn(color, new Position(i, row), this));
+                pieces.Add(new Pawn(color, new Position(i, col), this));
             }
             color = Player.White;
-            row = 7;
-            pieces.Add(new Rook(color, new Position(0, row), this));
-            pieces.Add(new Knight(color, new Position(1, row), this));
-            pieces.Add(new Bishop(color, new Position(2, row), this));
-            pieces.Add(new Queen(color, new Position(3, row), this));
-            pieces.Add(new King(color, new Position(4, row), this));
-            pieces.Add(new Bishop(color, new Position(5, row), this));
-            pieces.Add(new Knight(color, new Position(6, row), this));
-            pieces.Add(new Rook(color, new Position(7, row), this));
-            row--;
+            col = 7;
+            pieces.Add(new Rook(color, new Position(0, col), this));
+            pieces.Add(new Knight(color, new Position(1, col), this));
+            pieces.Add(new Bishop(color, new Position(2, col), this));
+            pieces.Add(new Queen(color, new Position(3, col), this));
+            pieces.Add(new King(color, new Position(4, col), this));
+            pieces.Add(new Bishop(color, new Position(5, col), this));
+            pieces.Add(new Knight(color, new Position(6, col), this));
+            pieces.Add(new Rook(color, new Position(7, col), this));
+            col--;
             for (int i = 0; i < 8; i++)
             {
-                pieces.Add(new Pawn(color, new Position(i, row), this));
+                pieces.Add(new Pawn(color, new Position(i, col), this));
             }
         }
 
         private void Initialize()
         {
+            squares.ForEach( sq => { sq.Controls.Clear(); } );
             foreach (Piece piece in pieces)
             {
                 foreach (Square square in squares)
@@ -95,15 +100,23 @@ namespace ChessGame.Logic.General
         {
             foreach (Piece piece in pieces)
             {
-                piece.Active = false;
+                if (piece.Attack)
+                {
+                    piece.Attack = false;
+                    piece.Click -= piece.AttackClick;
+                    piece.Click += piece.ClickOn;
+                }
             }
             foreach (Square square in squares)
             {
                 if (square.BackColor == Color.LightGreen)
                 {
-                    square.Click -= GreenSquareClick;
-                    square.Click += SquareClick;
+                    RemoveSquareClick(square, GreenSquareClick);
                 }
+                //if(square.BackColor == Color.Red) 
+                //{
+                //    RemoveSquareClick(square, RedSquareClick);
+                //}
                 if ((square.Position.Row + square.Position.Column) % 2 == 0)
                 {
                     square.BackColor = BACKGROUND_COLOR;
@@ -118,27 +131,20 @@ namespace ChessGame.Logic.General
         private void SquareClick(object sender, System.EventArgs e)
         {
             BoardDrawing();
+            activePosition = null;
         }
 
         private void GreenSquareClick(object sender, System.EventArgs e)
         {
-            Piece selectedPiece = null;
-            foreach (Piece p in pieces)
-            {
-                if (p.Active == true)
-                {
-                    selectedPiece = p;
-                    break;
-                }
-            }
+            Piece selectedPiece = GetPiece(activePosition);
             if (selectedPiece != null)
             {
-                Square originalSquare = getSquare(selectedPiece.Position);
+                Square originalSquare = GetSquare(selectedPiece.Position);
                 originalSquare.Controls.Remove(selectedPiece);
                 Square targetSquare = (Square)sender;
                 selectedPiece.Position = targetSquare.Position;
                 targetSquare.Controls.Add(selectedPiece);
-                selectedPiece.Active = false;
+                activePosition = null;
                 selectedPiece.Moved = true;
             }
             BoardDrawing();
@@ -150,16 +156,78 @@ namespace ChessGame.Logic.General
             square.Click += GreenSquareClick;
         }
 
-        public Square getSquare(Position position)
+        public void RemoveSquareClick(Square square, EventHandler function)
         {
-            foreach(Square square in squares)
+            square.Click -= function;
+            square.Click += SquareClick;
+        }
+
+        public Square GetSquare(Position position)
+        {
+            foreach (Square square in squares)
             {
-                if(square.Position == position)
+                if (square.Position == position)
                 {
                     return square;
                 }
             }
             return null;
+        }
+
+        public Piece GetPiece(Position position)
+        {
+            foreach(Piece piece in pieces)
+            {
+                if(piece.Position == position)
+                {
+                    return piece;
+                }
+            }
+            return null;
+        }
+
+        public List<Piece> GetAttackedPieces() 
+        {
+            List<Piece> attacked = new List<Piece>();
+            foreach (Piece piece in pieces)
+            {
+                if (piece.Attack)
+                {
+                    attacked.Add(piece);
+                }
+            }
+            return attacked;
+        }
+
+        public void Attack(Position attackPosition)
+        {
+            Piece activePiece = GetPiece(activePosition);
+            Piece attackedPiece = GetPiece(attackPosition);
+            if (activePiece != null && attackedPiece != null)
+            {
+                Square activeSquare = GetSquare(activePiece.Position);
+                Square attackedSquare = GetSquare(attackPosition);
+                attackedPiece.Click -= attackedPiece.AttackClick;
+                attackedPiece.Click += attackedPiece.ClickOn;
+                activePiece.Position = attackedPiece.Position;
+                pieces.Remove(attackedPiece);
+                removedPieces.Add(attackedPiece);
+                attackedSquare.Controls.Remove(attackedPiece);
+                activeSquare.Controls.Remove(activePiece);
+                attackedSquare.Controls.Add(activePiece);
+                activePosition = null;
+            }
+            BoardDrawing();
+        }
+
+        public void SetActivePosition(Position position)
+        {
+            activePosition = position;
+        }
+
+        public Position GetActivePosition()
+        {
+            return activePosition;
         }
     }
 }

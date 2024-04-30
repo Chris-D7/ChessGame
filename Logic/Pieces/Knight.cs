@@ -1,9 +1,5 @@
 ﻿using ChessGame.Logic.General;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ChessGame.Logic.Pieces
 {
@@ -24,6 +20,26 @@ namespace ChessGame.Logic.Pieces
             {
                 this.Image = Properties.Resources.BlackKnight;
             }
+        }
+
+        public override void AttackClick(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void ClickOn(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void PrintMove()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void PrintAttack()
+        {
+            throw new NotImplementedException();
         }
     }
 }

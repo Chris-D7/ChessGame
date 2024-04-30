@@ -1,4 +1,6 @@
 ﻿using ChessGame.Logic.General;
+using System;
+using System.Runtime.Remoting.Channels;
 using System.Windows.Forms;
 
 namespace ChessGame.Logic.Pieces
@@ -9,14 +11,26 @@ namespace ChessGame.Logic.Pieces
         public abstract Position Position { get; set; }
         public abstract Player Color { get; }
         public bool Moved { get; set; } = false;
-        public bool Active { get; set; } = false;
+        public bool Attack { get; set; } = false;
         public Board board;
 
         public Piece(Board board)
         {
-            this.Size = new System.Drawing.Size(80, 80);
-            this.Location = new System.Drawing.Point(0, 0);
+            Size = new System.Drawing.Size(80, 80);
+            Location = new System.Drawing.Point(0, 0);
             this.board = board;
         }
+
+        public virtual void AttackClick(object sender, System.EventArgs e)
+        {
+            board.Attack(((Piece)sender).Position);
+        }
+
+        public abstract void PrintMove();
+
+        public abstract void PrintAttack();
+
+        public abstract void ClickOn(object sender, EventArgs e);
+
     }
 }
