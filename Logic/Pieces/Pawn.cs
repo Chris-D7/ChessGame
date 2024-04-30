@@ -34,7 +34,7 @@ namespace ChessGame.Logic.Pieces
             Square square = piece.board.GetSquare(position);
             square.BackColor = Board.SELECTED_COLOR;
             piece.PrintMove();
-            ((Pawn)piece).PrintAttack();
+            piece.PrintAttack();
         }
 
         public override void PrintMove()
@@ -42,20 +42,21 @@ namespace ChessGame.Logic.Pieces
             int i = Moved ? 2 : 3;
             for (int k = 1; k < i; k++)
             {
-                Square square = board.GetSquare(this.Position + (k * face));
+                Position position = this.Position + (k * face);
+                Square square = board.GetSquare(position);
                 if (square != null)
                 {
                     if (square.Controls.Count > 0)
                     {
                         break;
                     }
-                    square.BackColor = Board.MOVE_COLOR;
+                    square.BackColor = ((position.Row + position.Column) % 2 == 0) ? Board.MOVE_CONTRAST_COLOR : Board.MOVE_BACKGROUND_COLOR;
                     board.SetGreenSquareClick(square);
                 }
             }
         }
 
-        public void PrintAttack()
+        public override void PrintAttack()
         {
             Direction directionRight, directionLeft;
             if (face == Direction.Up)

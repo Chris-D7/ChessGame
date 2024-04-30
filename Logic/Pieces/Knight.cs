@@ -8,10 +8,10 @@ namespace ChessGame.Logic.Pieces
         public override Position Position { get; set; }
         public override Player Color { get; }
         private readonly Direction[] directions = {
-        new Direction(2, 1), //new Direction(2, -1),
-        new Direction(-2, 1), //new Direction(-2, -1),
-        new Direction(1, 2), //new Direction(1, -2),
-        new Direction(-1, 2), //new Direction(-1, -2)
+            new Direction(2, 1), //new Direction(2, -1),
+            new Direction(-2, 1), //new Direction(-2, -1),
+            new Direction(1, 2), //new Direction(1, -2),
+            new Direction(-1, 2), //new Direction(-1, -2)
         };
 
         public Knight(Player color, Position position, Board board) : base(board)
@@ -36,7 +36,8 @@ namespace ChessGame.Logic.Pieces
             while (index < 8)
             {
                 if(index == 4) { scalar = -scalar; }
-                Square square = board.GetSquare(this.Position + (scalar * directions[index%4]));
+                Position position = this.Position + (scalar * directions[index % 4]);
+                Square square = board.GetSquare(position);
                 if (square != null)
                 {
                     if (square.Controls.Count > 0)
@@ -52,24 +53,13 @@ namespace ChessGame.Logic.Pieces
                     }
                     else
                     {
-                        square.BackColor = Board.MOVE_COLOR;
+                        square.BackColor = ((position.Row + position.Column) % 2 == 0) ? Board.MOVE_CONTRAST_COLOR : Board.MOVE_BACKGROUND_COLOR;
                         board.SetGreenSquareClick(square);
                     }
 
                 }
                 index++;
             }
-        }
-
-        public override void ClickOn(object sender, EventArgs e)
-        {
-            Piece piece = (Piece)sender;
-            piece.board.BoardDrawing();
-            Position position = piece.Position;
-            piece.board.SetActivePosition(position);
-            Square square = piece.board.GetSquare(position);
-            square.BackColor = Board.SELECTED_COLOR;
-            piece.PrintMove();
         }
     }
 }

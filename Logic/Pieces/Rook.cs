@@ -31,7 +31,8 @@ namespace ChessGame.Logic.Pieces
             while(index<4)
             {
                 scalar++;
-                Square square = board.GetSquare(this.Position + (scalar * directions[index]));
+                Position position = this.Position + (scalar * directions[index]);
+                Square square = board.GetSquare(position);
                 if (square != null)
                 {
                     if (square.Controls.Count > 0)
@@ -49,7 +50,7 @@ namespace ChessGame.Logic.Pieces
                     }
                     else
                     {
-                        square.BackColor = Board.MOVE_COLOR;
+                        square.BackColor = ((position.Row + position.Column) % 2 == 0) ? Board.MOVE_CONTRAST_COLOR : Board.MOVE_BACKGROUND_COLOR;
                         board.SetGreenSquareClick(square);
                     }
                     
@@ -60,17 +61,6 @@ namespace ChessGame.Logic.Pieces
                     scalar = 0;
                 }
             }
-        }
-
-        public override void ClickOn(object sender, EventArgs e)
-        {
-            Piece piece = (Piece)sender;
-            piece.board.BoardDrawing();
-            Position position = piece.Position;
-            piece.board.SetActivePosition(position);
-            Square square = piece.board.GetSquare(position);
-            square.BackColor = Board.SELECTED_COLOR;
-            piece.PrintMove();
         }
     }
 }

@@ -11,7 +11,8 @@ namespace ChessGame.Logic.General
         public static readonly Color CONTRAST_COLOR = Color.SaddleBrown;
         public static readonly Color BACKGROUND_COLOR = Color.LightYellow;
         public static readonly Color ATTACK_COLOR = Color.Red;
-        public static readonly Color MOVE_COLOR = Color.LightGreen;
+        public static readonly Color MOVE_CONTRAST_COLOR = Color.FromArgb(255, 150, 205, 100);
+        public static readonly Color MOVE_BACKGROUND_COLOR = Color.FromArgb(255, 80, 155, 30);
         public static readonly Color SELECTED_COLOR = Color.Green;
         public List<Piece> pieces = new List<Piece>();
         public List<Piece> removedPieces = new List<Piece>();
@@ -107,14 +108,10 @@ namespace ChessGame.Logic.General
             }
             foreach (Square square in squares)
             {
-                if (square.BackColor == Color.LightGreen)
+                if (square.BackColor == MOVE_BACKGROUND_COLOR || square.BackColor == MOVE_CONTRAST_COLOR)
                 {
                     RemoveSquareClick(square, GreenSquareClick);
                 }
-                //if(square.BackColor == Color.Red) 
-                //{
-                //    RemoveSquareClick(square, RedSquareClick);
-                //}
                 if ((square.Position.Row + square.Position.Column) % 2 == 0)
                 {
                     square.BackColor = BACKGROUND_COLOR;

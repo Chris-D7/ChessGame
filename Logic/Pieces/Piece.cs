@@ -27,7 +27,21 @@ namespace ChessGame.Logic.Pieces
 
         public abstract void PrintMove();
 
-        public abstract void ClickOn(object sender, EventArgs e);
+        public virtual void PrintAttack()
+        {
+            Console.WriteLine("########## Piece PrintAttack ##########");
+        }
+
+        public virtual void ClickOn(object sender, EventArgs e)
+        {
+            Piece piece = (Piece)sender;
+            piece.board.BoardDrawing();
+            Position position = piece.Position;
+            piece.board.SetActivePosition(position);
+            Square square = piece.board.GetSquare(position);
+            square.BackColor = Board.SELECTED_COLOR;
+            piece.PrintMove();
+        }
 
     }
 }
