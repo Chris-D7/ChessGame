@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace ChessGame.Logic.General
@@ -13,15 +14,19 @@ namespace ChessGame.Logic.General
         public static readonly Color ATTACK_COLOR = Color.Red;
         public static readonly Color MOVE_CONTRAST_COLOR = Color.FromArgb(255, 150, 205, 100);
         public static readonly Color MOVE_BACKGROUND_COLOR = Color.FromArgb(255, 80, 155, 30);
+        public static readonly Color PASSANT_COLOR = Color.Orange;
         public static readonly Color SELECTED_COLOR = Color.Green;
         public List<Piece> pieces = new List<Piece>();
         public List<Piece> removedPieces = new List<Piece>();
         public List<Square> squares { get; set; }
         private Position activePosition;
+        public Player player = Player.White;
+        private PictureBox pictureBoxTurn;
+        private Label labelTurn;
         public Board()
         {
             squares = new List<Square>();
-            this.Size = new Size(640, 640);
+            this.Size = new Size(730, 640);
             for (int i = 0; i < 8; i++)
             {
                 for (int j = 0; j < 8; j++)
@@ -93,6 +98,25 @@ namespace ChessGame.Logic.General
                     }
                 }
             }
+            this.labelTurn = new System.Windows.Forms.Label();
+            this.pictureBoxTurn = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxTurn)).BeginInit();
+            this.labelTurn.BackColor = System.Drawing.SystemColors.Control;
+            this.labelTurn.Font = new System.Drawing.Font("Arial Rounded MT Bold", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelTurn.Location = new System.Drawing.Point(650, 100);
+            this.labelTurn.Name = "labelTurn";
+            this.labelTurn.Size = new System.Drawing.Size(80, 24);
+            this.labelTurn.TabIndex = 0;
+            this.labelTurn.Text = "White";
+            this.labelTurn.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.pictureBoxTurn.Image = global::ChessGame.Properties.Resources.WhitePawn;
+            this.pictureBoxTurn.Location = new System.Drawing.Point(650, 15);
+            this.pictureBoxTurn.Name = "pictureBoxTurn";
+            this.pictureBoxTurn.Size = new System.Drawing.Size(80, 80);
+            this.pictureBoxTurn.TabIndex = 1;
+            this.pictureBoxTurn.TabStop = false;
+            this.Controls.Add(this.pictureBoxTurn);
+            this.Controls.Add(this.labelTurn);
         }
 
         public void BoardDrawing()
@@ -111,6 +135,10 @@ namespace ChessGame.Logic.General
                 if (square.BackColor == MOVE_BACKGROUND_COLOR || square.BackColor == MOVE_CONTRAST_COLOR)
                 {
                     RemoveSquareClick(square, GreenSquareClick);
+                }
+                if (square.BackColor == PASSANT_COLOR)
+                {
+                    RemoveSquareClick(square, PassantSquareClick);
                 }
                 if ((square.Position.Row + square.Position.Column) % 2 == 0)
                 {
@@ -138,11 +166,45 @@ namespace ChessGame.Logic.General
                 originalSquare.Controls.Remove(selectedPiece);
                 Square targetSquare = (Square)sender;
                 selectedPiece.Position = targetSquare.Position;
+                if (Math.Abs(targetSquare.Position.Column - originalSquare.Position.Column) == 2 && selectedPiece is Pawn)
+                {
+                    ((Pawn)selectedPiece).SetFirstBurst(true);
+                }
                 targetSquare.Controls.Add(selectedPiece);
                 activePosition = null;
                 selectedPiece.Moved = true;
             }
             BoardDrawing();
+            ChangeTurns();
+        }
+
+        private void PassantSquareClick(object sender, System.EventArgs e)
+        {
+            Square square = (Square)sender;
+            Position moveTo = square.Position;
+            Position attackPosition = moveTo;
+            if (moveTo.Column == 2)
+            {
+                attackPosition += Direction.Down;
+            }
+            else if (moveTo.Column == 5)
+            {
+                attackPosition += Direction.Up;
+            }
+            Position activePosition = GetActivePosition();
+            Square attackSquare = GetSquare(attackPosition);
+            Square activeSquare = GetSquare(activePosition);
+            Piece attackPiece = GetPiece(attackPosition);
+            Piece activePiece = GetPiece(activePosition);
+            attackSquare.Controls.Remove(attackPiece);
+            pieces.Remove(attackPiece);
+            removedPieces.Add(attackPiece);
+            activeSquare.Controls.Remove(activePiece);
+            activePiece.Position = moveTo;
+            square.Controls.Add(activePiece);
+            this.activePosition = null;
+            BoardDrawing();
+            ChangeTurns();
         }
 
         public void SetGreenSquareClick(Square square)
@@ -151,7 +213,13 @@ namespace ChessGame.Logic.General
             square.Click += GreenSquareClick;
         }
 
-        public void RemoveSquareClick(Square square, EventHandler function)
+        public void SetPassantSquareClick(Square square)
+        {
+            square.Click -= SquareClick;
+            square.Click += PassantSquareClick;
+        }
+
+        private void RemoveSquareClick(Square square, EventHandler function)
         {
             square.Click -= function;
             square.Click += SquareClick;
@@ -159,26 +227,12 @@ namespace ChessGame.Logic.General
 
         public Square GetSquare(Position position)
         {
-            foreach (Square square in squares)
-            {
-                if (square.Position == position)
-                {
-                    return square;
-                }
-            }
-            return null;
+            return squares.FirstOrDefault(square => square.Position == position);
         }
 
         public Piece GetPiece(Position position)
         {
-            foreach (Piece piece in pieces)
-            {
-                if (piece.Position == position)
-                {
-                    return piece;
-                }
-            }
-            return null;
+            return pieces.FirstOrDefault(piece => piece.Position == position);
         }
 
         public List<Piece> GetAttackedPieces()
@@ -214,6 +268,7 @@ namespace ChessGame.Logic.General
                 activePosition = null;
             }
             BoardDrawing();
+            ChangeTurns();
         }
 
         public void SetActivePosition(Position position)
@@ -224,6 +279,31 @@ namespace ChessGame.Logic.General
         public Position GetActivePosition()
         {
             return activePosition;
+        }
+
+        private void ChangeTurns()
+        {
+            switch (player = player.Opponent())
+            {
+                case Player.White:
+                    labelTurn.Text = "White";
+                    pictureBoxTurn.Image = Properties.Resources.WhitePawn;
+
+                    break;
+                case Player.Black:
+                    labelTurn.Text = "Black";
+                    pictureBoxTurn.Image = Properties.Resources.BlackPawn;
+                    break;
+                default:
+                    break;
+            }
+            foreach (Piece piece in pieces)
+            {
+                if (piece is Pawn pawn && piece.Color == player)
+                {
+                    pawn.SetFirstBurst(false);
+                }
+            }
         }
     }
 }

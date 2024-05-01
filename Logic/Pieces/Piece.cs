@@ -34,13 +34,16 @@ namespace ChessGame.Logic.Pieces
 
         public virtual void ClickOn(object sender, EventArgs e)
         {
-            Piece piece = (Piece)sender;
-            piece.board.BoardDrawing();
-            Position position = piece.Position;
-            piece.board.SetActivePosition(position);
-            Square square = piece.board.GetSquare(position);
-            square.BackColor = Board.SELECTED_COLOR;
-            piece.PrintMove();
+            if (board.player == Color)
+            {
+                Piece piece = (Piece)sender;
+                piece.board.BoardDrawing();
+                Position position = piece.Position;
+                piece.board.SetActivePosition(position);
+                Square square = piece.board.GetSquare(position);
+                square.BackColor = Board.SELECTED_COLOR;
+                piece.PrintMove();
+            }
         }
 
     }

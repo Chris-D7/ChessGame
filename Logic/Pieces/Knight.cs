@@ -1,5 +1,4 @@
 ﻿using ChessGame.Logic.General;
-using System;
 
 namespace ChessGame.Logic.Pieces
 {
@@ -35,7 +34,7 @@ namespace ChessGame.Logic.Pieces
             int index = 0;
             while (index < 8)
             {
-                if(index == 4) { scalar = -scalar; }
+                if (index == 4) { scalar = -scalar; }
                 Position position = this.Position + (scalar * directions[index % 4]);
                 Square square = board.GetSquare(position);
                 if (square != null)

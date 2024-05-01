@@ -1,5 +1,4 @@
 ﻿using ChessGame.Logic.General;
-using System;
 
 namespace ChessGame.Logic.Pieces
 {
@@ -7,7 +6,7 @@ namespace ChessGame.Logic.Pieces
     {
         public override Position Position { get; set; }
         public override Player Color { get; }
-        private readonly Direction[] directions = { 
+        private readonly Direction[] directions = {
             Direction.Up, Direction.Down, Direction.Left, Direction.Right,
             Direction.UpRight, Direction.UpLeft, Direction.DownRight, Direction.DownLeft
         };

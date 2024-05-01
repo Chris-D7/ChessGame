@@ -1,5 +1,4 @@
 ﻿using ChessGame.Logic.General;
-using System;
 
 namespace ChessGame.Logic.Pieces
 {

@@ -1,5 +1,4 @@
 ﻿using ChessGame.Logic.General;
-using System;
 
 namespace ChessGame.Logic.Pieces
 {
@@ -28,7 +27,7 @@ namespace ChessGame.Logic.Pieces
         {
             int scalar = 0;
             int index = 0;
-            while(index<4)
+            while (index < 4)
             {
                 scalar++;
                 Position position = this.Position + (scalar * directions[index]);
@@ -38,7 +37,7 @@ namespace ChessGame.Logic.Pieces
                     if (square.Controls.Count > 0)
                     {
                         Piece attack = board.GetPiece(square.Position);
-                        if(attack.Color != this.Color)
+                        if (attack.Color != this.Color)
                         {
                             square.BackColor = Board.ATTACK_COLOR;
                             attack.Attack = true;
@@ -53,7 +52,7 @@ namespace ChessGame.Logic.Pieces
                         square.BackColor = ((position.Row + position.Column) % 2 == 0) ? Board.MOVE_CONTRAST_COLOR : Board.MOVE_BACKGROUND_COLOR;
                         board.SetGreenSquareClick(square);
                     }
-                    
+
                 }
                 else
                 {

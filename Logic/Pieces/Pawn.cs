@@ -7,6 +7,7 @@ namespace ChessGame.Logic.Pieces
         public override Position Position { get; set; }
         public override Player Color { get; }
         private readonly Direction face;
+        private bool firstBurst = false;
 
         public Pawn(Player color, Position position, Board board) : base(board)
         {
@@ -27,14 +28,17 @@ namespace ChessGame.Logic.Pieces
 
         public override void ClickOn(object sender, System.EventArgs e)
         {
-            Piece piece = (Piece)sender;
-            piece.board.BoardDrawing();
-            Position position = piece.Position;
-            piece.board.SetActivePosition(position);
-            Square square = piece.board.GetSquare(position);
-            square.BackColor = Board.SELECTED_COLOR;
-            piece.PrintMove();
-            piece.PrintAttack();
+            if (board.player == Color)
+            {
+                Piece piece = (Piece)sender;
+                piece.board.BoardDrawing();
+                Position position = piece.Position;
+                piece.board.SetActivePosition(position);
+                Square square = piece.board.GetSquare(position);
+                square.BackColor = Board.SELECTED_COLOR;
+                piece.PrintMove();
+                piece.PrintAttack();
+            }
         }
 
         public override void PrintMove()
@@ -96,6 +100,62 @@ namespace ChessGame.Logic.Pieces
                     attack.Click += attack.AttackClick;
                 }
             }
+            if (Moved)
+            {
+                Position right = this.Position + Direction.Right;
+                Position left = this.Position + Direction.Left;
+                Piece leftPiece = board.GetPiece(left);
+                Piece rightPiece = board.GetPiece(right);
+                if (leftPiece is Pawn leftAttackPawn && leftPiece.Color != this.Color)
+                {
+                    if (leftAttackPawn.GetFirstBurst() && leftAttackPawn.GetFirstBurst())
+                    {
+                        if (face == Direction.Up && left.Column == 3)
+                        {
+                            PrintPassant(left);
+                        }
+                        if (face == Direction.Down && left.Column == 4)
+                        {
+                            PrintPassant(left);
+                        }
+                    }
+                }
+                if (rightPiece is Pawn rightAttackPawn && rightPiece.Color != this.Color)
+                {
+                    if (rightAttackPawn.GetFirstBurst() && rightAttackPawn.GetFirstBurst())
+                    {
+                        if (face == Direction.Up && right.Column == 3)
+                        {
+                            PrintPassant(right);
+                        }
+                        if (face == Direction.Down && right.Column == 4)
+                        {
+                            PrintPassant(right);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void PrintPassant(Position position)
+        {
+            Position moveTo = position + face;
+            Square moveToSquare = board.GetSquare(moveTo);
+            if (moveToSquare != null)
+            {
+                moveToSquare.BackColor = Board.ATTACK_COLOR;
+                board.SetPassantSquareClick(moveToSquare);
+            }
+        }
+
+        public void SetFirstBurst(bool value)
+        {
+            firstBurst = value;
+        }
+
+        public bool GetFirstBurst()
+        {
+            return firstBurst;
         }
     }
 }
