@@ -143,7 +143,7 @@ namespace ChessGame.Logic.Pieces
             Square moveToSquare = board.GetSquare(moveTo);
             if (moveToSquare != null)
             {
-                moveToSquare.BackColor = Board.ATTACK_COLOR;
+                moveToSquare.BackColor = Board.PASSANT_COLOR;
                 board.SetPassantSquareClick(moveToSquare);
             }
         }

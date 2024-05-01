@@ -14,7 +14,7 @@ namespace ChessGame.Logic.General
         public static readonly Color ATTACK_COLOR = Color.Red;
         public static readonly Color MOVE_CONTRAST_COLOR = Color.FromArgb(255, 150, 205, 100);
         public static readonly Color MOVE_BACKGROUND_COLOR = Color.FromArgb(255, 80, 155, 30);
-        public static readonly Color PASSANT_COLOR = Color.Orange;
+        public static readonly Color PASSANT_COLOR = Color.Red;
         public static readonly Color SELECTED_COLOR = Color.Green;
         public List<Piece> pieces = new List<Piece>();
         public List<Piece> removedPieces = new List<Piece>();
