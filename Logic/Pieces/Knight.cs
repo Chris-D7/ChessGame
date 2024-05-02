@@ -28,7 +28,7 @@ namespace ChessGame.Logic.Pieces
             this.Click += ClickOn;
         }
 
-        public override void PrintMove()
+        public override void PrintMove(bool changeHandles)
         {
             int scalar = 1;
             int index = 0;
@@ -45,15 +45,21 @@ namespace ChessGame.Logic.Pieces
                         if (attack.Color != this.Color)
                         {
                             square.BackColor = Board.ATTACK_COLOR;
-                            attack.Attack = true;
-                            attack.Click -= attack.ClickOn;
-                            attack.Click += attack.AttackClick;
+                            if (changeHandles)
+                            {
+                                attack.Attack = true;
+                                attack.Click -= attack.ClickOn;
+                                attack.Click += attack.AttackClick;
+                            }
                         }
                     }
                     else
                     {
                         square.BackColor = ((position.Row + position.Column) % 2 == 0) ? Board.MOVE_CONTRAST_COLOR : Board.MOVE_BACKGROUND_COLOR;
-                        board.SetGreenSquareClick(square);
+                        if (changeHandles)
+                        {
+                            board.SetGreenSquareClick(square);
+                        }
                     }
 
                 }

@@ -1,4 +1,6 @@
 ﻿using ChessGame.Logic.General;
+using System;
+using System.Collections.Generic;
 
 namespace ChessGame.Logic.Pieces
 {
@@ -23,10 +25,10 @@ namespace ChessGame.Logic.Pieces
             {
                 this.Image = Properties.Resources.BlackKing;
             }
-            this.Click += ClickOn;
+            this.Click += this.ClickOn;
         }
 
-        public override void PrintMove()
+        public override void PrintMove(bool changeHandles)
         {
             int index = 0;
             while (index < 8)
@@ -41,15 +43,21 @@ namespace ChessGame.Logic.Pieces
                         if (attack.Color != this.Color)
                         {
                             square.BackColor = Board.ATTACK_COLOR;
-                            attack.Attack = true;
-                            attack.Click -= attack.ClickOn;
-                            attack.Click += attack.AttackClick;
+                            if (changeHandles)
+                            {
+                                attack.Attack = true;
+                                attack.Click -= attack.ClickOn;
+                                attack.Click += attack.AttackClick;
+                            }
                         }
                     }
                     else
                     {
                         square.BackColor = ((position.Row + position.Column) % 2 == 0) ? Board.MOVE_CONTRAST_COLOR : Board.MOVE_BACKGROUND_COLOR;
-                        board.SetGreenSquareClick(square);
+                        if (changeHandles)
+                        {
+                            board.SetGreenSquareClick(square);
+                        }
                     }
 
                 }
@@ -57,5 +65,58 @@ namespace ChessGame.Logic.Pieces
             }
         }
 
+        public void PrintCastling()
+        {
+            if (!this.Moved)
+            {
+                List<Rook> rooks = board.GetRooksCastling();
+                List<Square> freeSquares = board.Check();
+                if (freeSquares.Contains(board.GetSquare(this.Position)))
+                {
+                    if (rooks.Count == 1)
+                    {
+                        if (rooks[0].Position.Row == 0)
+                        {
+                            DetermineCastlingSquares(freeSquares, Direction.Left);
+                        }
+                        else
+                        {
+                            DetermineCastlingSquares(freeSquares, Direction.Right);
+                        }
+                    }
+                    else if (rooks.Count == 2)
+                    {
+                        DetermineCastlingSquares(freeSquares, Direction.Left);
+                        DetermineCastlingSquares(freeSquares, Direction.Right);
+                    }
+                }
+            }
+        }
+
+        private void DetermineCastlingSquares(List<Square> freeSquares, Direction direction)
+        {
+            Square square1 = board.GetSquare(this.Position + (2 * direction));
+            Square square2 = board.GetSquare(this.Position + direction);
+            if (freeSquares.Contains(square1) && freeSquares.Contains(square2))
+            {
+                square1.BackColor = Board.CASTLING_COLOR;
+                board.SetCastlingSquareClick(square1);
+            }
+        }
+
+        public override void ClickOn(object sender, EventArgs e)
+        {
+            if (board.player == Color)
+            {
+                board.BoardDrawing(true);
+                PrintCastling();
+                Piece piece = (Piece)sender;
+                Position position = piece.Position;
+                piece.board.SetActivePosition(position);
+                Square square = piece.board.GetSquare(position);
+                square.BackColor = Board.SELECTED_COLOR;
+                piece.PrintMove(true);
+            }
+        }
     }
 }

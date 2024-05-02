@@ -14,7 +14,8 @@ namespace ChessGame.Logic.General
         public static readonly Color ATTACK_COLOR = Color.Red;
         public static readonly Color MOVE_CONTRAST_COLOR = Color.FromArgb(255, 150, 205, 100);
         public static readonly Color MOVE_BACKGROUND_COLOR = Color.FromArgb(255, 80, 155, 30);
-        public static readonly Color PASSANT_COLOR = Color.Red;
+        public static readonly Color PASSANT_COLOR = Color.HotPink;
+        public static readonly Color CASTLING_COLOR = Color.SkyBlue;
         public static readonly Color SELECTED_COLOR = Color.Green;
         public List<Piece> pieces = new List<Piece>();
         public List<Piece> removedPieces = new List<Piece>();
@@ -119,7 +120,7 @@ namespace ChessGame.Logic.General
             this.Controls.Add(this.labelTurn);
         }
 
-        public void BoardDrawing()
+        public void BoardDrawing(bool changeHandles)
         {
             foreach (Piece piece in pieces)
             {
@@ -132,13 +133,20 @@ namespace ChessGame.Logic.General
             }
             foreach (Square square in squares)
             {
-                if (square.BackColor == MOVE_BACKGROUND_COLOR || square.BackColor == MOVE_CONTRAST_COLOR)
+                if (changeHandles)
                 {
-                    RemoveSquareClick(square, GreenSquareClick);
-                }
-                if (square.BackColor == PASSANT_COLOR)
-                {
-                    RemoveSquareClick(square, PassantSquareClick);
+                    if (square.BackColor == MOVE_BACKGROUND_COLOR || square.BackColor == MOVE_CONTRAST_COLOR)
+                    {
+                        RemoveSquareClick(square, GreenSquareClick);
+                    }
+                    if (square.BackColor == PASSANT_COLOR)
+                    {
+                        RemoveSquareClick(square, PassantSquareClick);
+                    }
+                    if (square.BackColor == CASTLING_COLOR)
+                    {
+                        RemoveSquareClick(square, CastlingSquareClick);
+                    }
                 }
                 if ((square.Position.Row + square.Position.Column) % 2 == 0)
                 {
@@ -149,12 +157,12 @@ namespace ChessGame.Logic.General
                     square.BackColor = CONTRAST_COLOR;
                 }
             }
+            activePosition = null;
         }
 
         private void SquareClick(object sender, System.EventArgs e)
         {
-            BoardDrawing();
-            activePosition = null;
+            BoardDrawing(true);
         }
 
         private void GreenSquareClick(object sender, System.EventArgs e)
@@ -171,11 +179,10 @@ namespace ChessGame.Logic.General
                     ((Pawn)selectedPiece).SetFirstBurst(true);
                 }
                 targetSquare.Controls.Add(selectedPiece);
-                activePosition = null;
                 selectedPiece.Moved = true;
+                BoardDrawing(true);
+                ChangeTurns();
             }
-            BoardDrawing();
-            ChangeTurns();
         }
 
         private void PassantSquareClick(object sender, System.EventArgs e)
@@ -202,8 +209,7 @@ namespace ChessGame.Logic.General
             activeSquare.Controls.Remove(activePiece);
             activePiece.Position = moveTo;
             square.Controls.Add(activePiece);
-            this.activePosition = null;
-            BoardDrawing();
+            BoardDrawing(true);
             ChangeTurns();
         }
 
@@ -219,6 +225,12 @@ namespace ChessGame.Logic.General
             square.Click += PassantSquareClick;
         }
 
+        public void SetCastlingSquareClick(Square square)
+        {
+            square.Click -= SquareClick;
+            square.Click += CastlingSquareClick;
+        }
+
         private void RemoveSquareClick(Square square, EventHandler function)
         {
             square.Click -= function;
@@ -228,11 +240,21 @@ namespace ChessGame.Logic.General
         public Square GetSquare(Position position)
         {
             return squares.FirstOrDefault(square => square.Position == position);
+            //foreach (Square square in squares)
+            //{
+            //    if (square.Position == position) return square;
+            //}
+            //return null;
         }
 
         public Piece GetPiece(Position position)
         {
             return pieces.FirstOrDefault(piece => piece.Position == position);
+            //foreach (Piece piece in pieces)
+            //{
+            //    if (piece.Position == position) return piece;
+            //}
+            //return null;
         }
 
         public List<Piece> GetAttackedPieces()
@@ -265,9 +287,8 @@ namespace ChessGame.Logic.General
                 activeSquare.Controls.Remove(activePiece);
                 attackedSquare.Controls.Add(activePiece);
                 activePiece.Moved = true;
-                activePosition = null;
             }
-            BoardDrawing();
+            BoardDrawing(true);
             ChangeTurns();
         }
 
@@ -304,6 +325,71 @@ namespace ChessGame.Logic.General
                     pawn.SetFirstBurst(false);
                 }
             }
+        }
+
+        public List<Square> Check()
+        {
+            List<Square> freeSquares = new List<Square>();
+            foreach (Piece piece in pieces)
+            {
+                if (piece.Color != player)
+                {
+                    piece.PrintMove(false);
+                }
+            }
+            foreach(Square square in squares)
+            {
+                if ((square.BackColor == BACKGROUND_COLOR || square.BackColor == CONTRAST_COLOR) &&
+                    (GetPiece(square.Position) == null || GetPiece(square.Position) is King))
+                {
+                    freeSquares.Add(square);
+                }
+            }
+            BoardDrawing(false);
+            return freeSquares;
+        }
+
+        public List<Rook> GetRooksCastling()
+        {
+            List<Rook> rooks = new List<Rook>();
+            foreach (Piece piece in pieces)
+            {
+                if (piece is Rook rook && piece.Color == player && !piece.Moved)
+                {
+                    rooks.Add(rook);
+                }
+            }
+            return rooks;
+        }
+
+        public void CastlingSquareClick(object sender, EventArgs e)
+        {
+            Square castlingSquare = (Square)sender;
+            Square rookSquare = null, kingSquare = null, moveRookSquare = null;
+            if (castlingSquare.Position.Row == 2)
+            {
+                rookSquare = GetSquare(castlingSquare.Position + (2 * Direction.Left));
+                kingSquare = GetSquare(castlingSquare.Position + (2 * Direction.Right));
+                moveRookSquare = GetSquare(castlingSquare.Position + Direction.Right);
+            }
+            else if (castlingSquare.Position.Row == 6)
+            {
+                rookSquare = GetSquare(castlingSquare.Position + Direction.Right);
+                kingSquare = GetSquare(castlingSquare.Position + (2 * Direction.Left));
+                moveRookSquare = GetSquare(castlingSquare.Position + Direction.Left);
+            }
+            Piece rook = GetPiece(rookSquare.Position);
+            Piece king = GetPiece(kingSquare.Position);
+            rookSquare.Controls.Remove(rook);
+            moveRookSquare.Controls.Add(rook);
+            kingSquare.Controls.Remove(king);
+            castlingSquare.Controls.Add(king);
+            king.Position = castlingSquare.Position;
+            rook.Position = moveRookSquare.Position;
+            king.Moved = true;
+            rook.Moved = true;
+            BoardDrawing(true);
+            ChangeTurns();
         }
     }
 }

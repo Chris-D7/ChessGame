@@ -26,22 +26,21 @@ namespace ChessGame.Logic.Pieces
             this.Click += ClickOn;
         }
 
-        public override void ClickOn(object sender, System.EventArgs e)
-        {
-            if (board.player == Color)
-            {
-                Piece piece = (Piece)sender;
-                piece.board.BoardDrawing();
-                Position position = piece.Position;
-                piece.board.SetActivePosition(position);
-                Square square = piece.board.GetSquare(position);
-                square.BackColor = Board.SELECTED_COLOR;
-                piece.PrintMove();
-                piece.PrintAttack();
-            }
-        }
+        //public override void ClickOn(object sender, System.EventArgs e)
+        //{
+        //    if (board.player == Color)
+        //    {
+        //        Piece piece = (Piece)sender;
+        //        piece.board.BoardDrawing();
+        //        Position position = piece.Position;
+        //        piece.board.SetActivePosition(position);
+        //        Square square = piece.board.GetSquare(position);
+        //        square.BackColor = Board.SELECTED_COLOR;
+        //        piece.PrintMove(true);
+        //    }
+        //}
 
-        public override void PrintMove()
+        public override void PrintMove(bool changeHandles)
         {
             int i = Moved ? 2 : 3;
             for (int k = 1; k < i; k++)
@@ -55,12 +54,16 @@ namespace ChessGame.Logic.Pieces
                         break;
                     }
                     square.BackColor = ((position.Row + position.Column) % 2 == 0) ? Board.MOVE_CONTRAST_COLOR : Board.MOVE_BACKGROUND_COLOR;
-                    board.SetGreenSquareClick(square);
+                    if (changeHandles)
+                    {
+                        board.SetGreenSquareClick(square);
+                    }
                 }
             }
+            PrintAttack(changeHandles);
         }
 
-        public override void PrintAttack()
+        public override void PrintAttack(bool changeHandles)
         {
             Direction directionRight, directionLeft;
             if (face == Direction.Up)
@@ -84,9 +87,12 @@ namespace ChessGame.Logic.Pieces
                 if (attack != null && attack.Color != this.Color)
                 {
                     squareLeft.BackColor = Board.ATTACK_COLOR;
-                    attack.Attack = true;
-                    attack.Click -= attack.ClickOn;
-                    attack.Click += attack.AttackClick;
+                    if (changeHandles)
+                    {
+                        attack.Attack = true;
+                        attack.Click -= attack.ClickOn;
+                        attack.Click += attack.AttackClick;
+                    }
                 }
             }
             if (squareRight != null && squareRight.Controls.Count > 0)
@@ -95,9 +101,12 @@ namespace ChessGame.Logic.Pieces
                 if (attack != null && attack.Color != this.Color)
                 {
                     squareRight.BackColor = Board.ATTACK_COLOR;
-                    attack.Attack = true;
-                    attack.Click -= attack.ClickOn;
-                    attack.Click += attack.AttackClick;
+                    if (changeHandles)
+                    {
+                        attack.Attack = true;
+                        attack.Click -= attack.ClickOn;
+                        attack.Click += attack.AttackClick;
+                    }
                 }
             }
             if (Moved)
@@ -112,11 +121,11 @@ namespace ChessGame.Logic.Pieces
                     {
                         if (face == Direction.Up && left.Column == 3)
                         {
-                            PrintPassant(left);
+                            PrintPassant(left, changeHandles);
                         }
                         if (face == Direction.Down && left.Column == 4)
                         {
-                            PrintPassant(left);
+                            PrintPassant(left, changeHandles);
                         }
                     }
                 }
@@ -126,25 +135,28 @@ namespace ChessGame.Logic.Pieces
                     {
                         if (face == Direction.Up && right.Column == 3)
                         {
-                            PrintPassant(right);
+                            PrintPassant(right, changeHandles);
                         }
                         if (face == Direction.Down && right.Column == 4)
                         {
-                            PrintPassant(right);
+                            PrintPassant(right, changeHandles);
                         }
                     }
                 }
             }
         }
 
-        private void PrintPassant(Position position)
+        private void PrintPassant(Position position, bool changeHandles)
         {
             Position moveTo = position + face;
             Square moveToSquare = board.GetSquare(moveTo);
             if (moveToSquare != null)
             {
                 moveToSquare.BackColor = Board.PASSANT_COLOR;
-                board.SetPassantSquareClick(moveToSquare);
+                if (changeHandles)
+                {
+                    board.SetPassantSquareClick(moveToSquare);
+                }
             }
         }
 
