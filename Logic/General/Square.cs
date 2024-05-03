@@ -6,6 +6,8 @@ namespace ChessGame.Logic.General
     {
         public Position Position { get; set; }
 
+        public SquareHandle SquareHandle { get; set; }
+
         public Square(Position position)
         {
             Position = position;

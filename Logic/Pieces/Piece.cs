@@ -25,7 +25,7 @@ namespace ChessGame.Logic.Pieces
             board.Attack(((Piece)sender).Position);
         }
 
-        public abstract void PrintMove(bool changeHandles);
+        public abstract void PrintMove(bool changeHandles = true);
 
         public virtual void PrintAttack(bool changeHandles)
         {
@@ -37,12 +37,12 @@ namespace ChessGame.Logic.Pieces
             if (board.player == Color)
             {
                 Piece piece = (Piece)sender;
-                piece.board.BoardDrawing(true);
+                piece.board.BoardDrawing();
                 Position position = piece.Position;
                 piece.board.SetActivePosition(position);
                 Square square = piece.board.GetSquare(position);
                 square.BackColor = Board.SELECTED_COLOR;
-                piece.PrintMove(true);
+                piece.PrintMove();
             }
         }
 

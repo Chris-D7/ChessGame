@@ -26,20 +26,6 @@ namespace ChessGame.Logic.Pieces
             this.Click += ClickOn;
         }
 
-        //public override void ClickOn(object sender, System.EventArgs e)
-        //{
-        //    if (board.player == Color)
-        //    {
-        //        Piece piece = (Piece)sender;
-        //        piece.board.BoardDrawing();
-        //        Position position = piece.Position;
-        //        piece.board.SetActivePosition(position);
-        //        Square square = piece.board.GetSquare(position);
-        //        square.BackColor = Board.SELECTED_COLOR;
-        //        piece.PrintMove(true);
-        //    }
-        //}
-
         public override void PrintMove(bool changeHandles)
         {
             int i = Moved ? 2 : 3;
@@ -56,7 +42,7 @@ namespace ChessGame.Logic.Pieces
                     square.BackColor = ((position.Row + position.Column) % 2 == 0) ? Board.MOVE_CONTRAST_COLOR : Board.MOVE_BACKGROUND_COLOR;
                     if (changeHandles)
                     {
-                        board.SetGreenSquareClick(square);
+                        board.SetSquareHandleClick(square, SquareHandle.Move);
                     }
                 }
             }
@@ -155,7 +141,7 @@ namespace ChessGame.Logic.Pieces
                 moveToSquare.BackColor = Board.PASSANT_COLOR;
                 if (changeHandles)
                 {
-                    board.SetPassantSquareClick(moveToSquare);
+                    board.SetSquareHandleClick(moveToSquare, SquareHandle.Passant);
                 }
             }
         }

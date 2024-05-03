@@ -55,7 +55,7 @@ namespace ChessGame.Logic.Pieces
                         square.BackColor = ((position.Row + position.Column) % 2 == 0) ? Board.MOVE_CONTRAST_COLOR : Board.MOVE_BACKGROUND_COLOR;
                         if (changeHandles)
                         {
-                            board.SetGreenSquareClick(square);
+                            board.SetSquareHandleClick(square, SquareHandle.Move);
                         }
                     }
 

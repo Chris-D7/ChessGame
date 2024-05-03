@@ -56,7 +56,7 @@ namespace ChessGame.Logic.Pieces
                         square.BackColor = ((position.Row + position.Column) % 2 == 0) ? Board.MOVE_CONTRAST_COLOR : Board.MOVE_BACKGROUND_COLOR;
                         if (changeHandles)
                         {
-                            board.SetGreenSquareClick(square);
+                            board.SetSquareHandleClick(square, SquareHandle.Move);
                         }
                     }
 
@@ -69,7 +69,7 @@ namespace ChessGame.Logic.Pieces
         {
             if (!this.Moved)
             {
-                List<Rook> rooks = board.GetRooksCastling();
+                List<Rook> rooks = board.CastlingGetRooks();
                 List<Square> freeSquares = board.Check();
                 if (freeSquares.Contains(board.GetSquare(this.Position)))
                 {
@@ -97,25 +97,38 @@ namespace ChessGame.Logic.Pieces
         {
             Square square1 = board.GetSquare(this.Position + (2 * direction));
             Square square2 = board.GetSquare(this.Position + direction);
-            if (freeSquares.Contains(square1) && freeSquares.Contains(square2))
+            if(direction == Direction.Left)
             {
-                square1.BackColor = Board.CASTLING_COLOR;
-                board.SetCastlingSquareClick(square1);
+                Piece square3Piece = board.GetPiece(this.Position + 3 * direction);
+                if (freeSquares.Contains(square1) && freeSquares.Contains(square2) && square3Piece == null)
+                {
+                    square1.BackColor = Board.CASTLING_COLOR;
+                    board.SetSquareHandleClick(square1, SquareHandle.Castling);
+                }
             }
+            else
+            {
+                if (freeSquares.Contains(square1) && freeSquares.Contains(square2))
+                {
+                    square1.BackColor = Board.CASTLING_COLOR;
+                    board.SetSquareHandleClick(square1, SquareHandle.Castling);
+                }
+            }
+
         }
 
         public override void ClickOn(object sender, EventArgs e)
         {
             if (board.player == Color)
             {
-                board.BoardDrawing(true);
+                board.BoardDrawing();
                 PrintCastling();
                 Piece piece = (Piece)sender;
                 Position position = piece.Position;
                 piece.board.SetActivePosition(position);
                 Square square = piece.board.GetSquare(position);
                 square.BackColor = Board.SELECTED_COLOR;
-                piece.PrintMove(true);
+                piece.PrintMove();
             }
         }
     }
