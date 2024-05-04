@@ -70,7 +70,7 @@ namespace ChessGame.Logic.Pieces
             if (!this.Moved)
             {
                 List<Rook> rooks = board.CastlingGetRooks();
-                List<Square> freeSquares = board.Check();
+                List<Square> freeSquares = board.CastlingCheck();
                 if (freeSquares.Contains(board.GetSquare(this.Position)))
                 {
                     if (rooks.Count == 1)
@@ -119,7 +119,7 @@ namespace ChessGame.Logic.Pieces
 
         public override void ClickOn(object sender, EventArgs e)
         {
-            if (board.player == Color)
+            if (board.player == Color && !board.getPawnPromotionHappening())
             {
                 board.BoardDrawing();
                 PrintCastling();

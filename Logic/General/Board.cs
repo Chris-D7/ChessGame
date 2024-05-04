@@ -39,11 +39,11 @@ namespace ChessGame.Logic.General
 
         #region Variables
 
-        public List<Piece> pieces;
+        private List<Piece> piecesList;
 
-        public List<Piece> removedPieces;
+        private List<Piece> removedPiecesList;
 
-        public List<Square> squares;
+        private List<Square> squaresList;
 
         private Position activePosition;
 
@@ -53,17 +53,23 @@ namespace ChessGame.Logic.General
 
         private Label labelTurn;
 
+        private Panel removedPiecesPanel;
+
+        private bool pawnPromotionHappening;
+
         #endregion
 
         public Board()
         {
-            squares = new List<Square>();
+            pawnPromotionHappening = false;
 
-            removedPieces = new List<Piece>();
+            squaresList = new List<Square>();
 
-            pieces = new List<Piece>();
+            removedPiecesList = new List<Piece>();
 
-            this.Size = new Size(730, 640);
+            piecesList = new List<Piece>();
+
+            this.Size = new Size(750, 640);
 
             for (int i = 0; i < 8; i++)
             {
@@ -87,7 +93,7 @@ namespace ChessGame.Logic.General
                     }
                     this.Controls.Add(square);
 
-                    squares.Add(square);
+                    squaresList.Add(square);
                 }
             }
             AddPieces();
@@ -101,48 +107,48 @@ namespace ChessGame.Logic.General
 
             int col = 0;
 
-            pieces.Add(new Rook(color, new Position(0, col), this));
-            pieces.Add(new Knight(color, new Position(1, col), this));
-            pieces.Add(new Bishop(color, new Position(2, col), this));
-            pieces.Add(new Queen(color, new Position(3, col), this));
-            pieces.Add(new King(color, new Position(4, col), this));
-            pieces.Add(new Bishop(color, new Position(5, col), this));
-            pieces.Add(new Knight(color, new Position(6, col), this));
-            pieces.Add(new Rook(color, new Position(7, col), this));
+            piecesList.Add(new Rook(color, new Position(0, col), this));
+            piecesList.Add(new Knight(color, new Position(1, col), this));
+            piecesList.Add(new Bishop(color, new Position(2, col), this));
+            piecesList.Add(new Queen(color, new Position(3, col), this));
+            piecesList.Add(new King(color, new Position(4, col), this));
+            piecesList.Add(new Bishop(color, new Position(5, col), this));
+            piecesList.Add(new Knight(color, new Position(6, col), this));
+            piecesList.Add(new Rook(color, new Position(7, col), this));
 
             col++;
 
             for (int i = 0; i < 8; i++)
             {
-                pieces.Add(new Pawn(color, new Position(i, col), this));
+                piecesList.Add(new Pawn(color, new Position(i, col), this));
             }
             color = Player.White;
 
             col = 7;
 
-            pieces.Add(new Rook(color, new Position(0, col), this));
-            pieces.Add(new Knight(color, new Position(1, col), this));
-            pieces.Add(new Bishop(color, new Position(2, col), this));
-            pieces.Add(new Queen(color, new Position(3, col), this));
-            pieces.Add(new King(color, new Position(4, col), this));
-            pieces.Add(new Bishop(color, new Position(5, col), this));
-            pieces.Add(new Knight(color, new Position(6, col), this));
-            pieces.Add(new Rook(color, new Position(7, col), this));
+            piecesList.Add(new Rook(color, new Position(0, col), this));
+            piecesList.Add(new Knight(color, new Position(1, col), this));
+            piecesList.Add(new Bishop(color, new Position(2, col), this));
+            piecesList.Add(new Queen(color, new Position(3, col), this));
+            piecesList.Add(new King(color, new Position(4, col), this));
+            piecesList.Add(new Bishop(color, new Position(5, col), this));
+            piecesList.Add(new Knight(color, new Position(6, col), this));
+            piecesList.Add(new Rook(color, new Position(7, col), this));
 
             col--;
 
             for (int i = 0; i < 8; i++)
             {
-                pieces.Add(new Pawn(color, new Position(i, col), this));
+                piecesList.Add(new Pawn(color, new Position(i, col), this));
             }
         }
 
         private void Initialize()
         {
-            squares.ForEach(sq => { sq.Controls.Clear(); });
-            foreach (Piece piece in pieces)
+            squaresList.ForEach(sq => { sq.Controls.Clear(); });
+            foreach (Piece piece in piecesList)
             {
-                foreach (Square square in squares)
+                foreach (Square square in squaresList)
                 {
                     if (square.Position == piece.Position)
                     {
@@ -151,7 +157,7 @@ namespace ChessGame.Logic.General
                 }
             }
 
-            #region Turn Controls
+            #region Controls
             this.labelTurn = new System.Windows.Forms.Label();
             this.pictureBoxTurn = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxTurn)).BeginInit();
@@ -171,13 +177,21 @@ namespace ChessGame.Logic.General
             this.pictureBoxTurn.TabStop = false;
             this.Controls.Add(this.pictureBoxTurn);
             this.Controls.Add(this.labelTurn);
+            removedPiecesPanel = new Panel
+            {
+                Size = new Size(100, 490),
+                Location = new Point(650, 150),
+                Visible = true,
+                AutoScroll = true
+            };
+            this.Controls.Add(removedPiecesPanel);
             #endregion
 
         }
 
         public void BoardDrawing(bool changeHandles = true)
         {
-            foreach (Piece piece in pieces)
+            foreach (Piece piece in piecesList)
             {
                 if (piece.Attack)
                 {
@@ -186,7 +200,7 @@ namespace ChessGame.Logic.General
                     piece.Click += piece.ClickOn;
                 }
             }
-            foreach (Square square in squares)
+            foreach (Square square in squaresList)
             {
                 if (changeHandles)
                 {
@@ -223,19 +237,84 @@ namespace ChessGame.Logic.General
 
                 selectedPiece.Position = targetSquare.Position;
 
-                if (Math.Abs(targetSquare.Position.Column - originalSquare.Position.Column) == 2 && selectedPiece is Pawn pawn)
-                {
-                    pawn.SetFirstBurst(true);
-                }
-
                 targetSquare.Controls.Add(selectedPiece);
 
                 selectedPiece.Moved = true;
 
+                if (selectedPiece is Pawn pawn)
+                {
+                    if (Math.Abs(targetSquare.Position.Column - originalSquare.Position.Column) == 2)
+                    {
+                        pawn.SetFirstBurst(true);
+                    }
+
+                    if (removedPiecesList.Count() > 0 && (pawn.Position.Column == 0 || pawn.Position.Column == 7))
+                    {
+                        PawnPromotion(pawn);
+                    }
+                }
+
                 BoardDrawing();
 
-                ChangeTurns();
+                if (!pawnPromotionHappening)
+                {
+                    ChangeTurns();
+                }
             }
+        }
+
+        private void PawnPromotion(Pawn pawn)
+        {
+            pawnPromotionHappening = true;
+
+            List<Image> uniquePieceImages = removedPiecesList
+                .Where(piece => piece.Color == player && !(piece is Pawn))
+                .Select(piece => piece.Image)
+                .Distinct()
+                .ToList();
+
+            int locationHeight = 0;
+
+            foreach (Image image in uniquePieceImages)
+            {
+                PictureBox pieceCameo = new PictureBox
+                {
+                    Size = new Size(80, 80),
+                    Image = image,
+                    Location = new Point(0, locationHeight)
+                };
+
+                Piece pieceToReturn = removedPiecesList
+                    .FirstOrDefault(piece => piece.Color == player && piece.Image == image);
+
+                pieceCameo.Click += (sender, e) =>
+                {
+                    Position position = pawn.Position;
+                    Square square = GetSquare(position);
+
+                    square.Controls.Remove(pawn);
+                    piecesList.Remove(pawn);
+                    removedPiecesList.Add(pawn);
+
+                    square.Controls.Add(pieceToReturn);
+                    piecesList.Add(pieceToReturn);
+                    removedPiecesList.Remove(pieceToReturn);
+
+                    pieceToReturn.Position = position;
+                    removedPiecesPanel.Controls.Clear();
+
+                    pawnPromotionHappening = false;
+                    ChangeTurns();
+                };
+
+                removedPiecesPanel.Controls.Add(pieceCameo);
+                locationHeight += 80;
+            }
+        }
+
+        public bool getPawnPromotionHappening()
+        {
+            return pawnPromotionHappening;
         }
 
         private void PassantSquareClick(object sender, System.EventArgs e)
@@ -268,9 +347,9 @@ namespace ChessGame.Logic.General
 
             attackSquare.Controls.Remove(attackPiece);
 
-            pieces.Remove(attackPiece);
+            piecesList.Remove(attackPiece);
 
-            removedPieces.Add(attackPiece);
+            removedPiecesList.Add(attackPiece);
 
             activeSquare.Controls.Remove(activePiece);
 
@@ -324,12 +403,12 @@ namespace ChessGame.Logic.General
 
         public Square GetSquare(Position position)
         {
-            return squares.FirstOrDefault(square => square.Position == position);
+            return squaresList.FirstOrDefault(square => square.Position == position);
         }
 
         public Piece GetPiece(Position position)
         {
-            return pieces.FirstOrDefault(piece => piece.Position == position);
+            return piecesList.FirstOrDefault(piece => piece.Position == position);
         }
 
         public void Attack(Position attackPosition)
@@ -350,9 +429,9 @@ namespace ChessGame.Logic.General
 
                 activePiece.Position = attackedPiece.Position;
 
-                pieces.Remove(attackedPiece);
+                piecesList.Remove(attackedPiece);
 
-                removedPieces.Add(attackedPiece);
+                removedPiecesList.Add(attackedPiece);
 
                 attackedSquare.Controls.Remove(attackedPiece);
 
@@ -395,7 +474,7 @@ namespace ChessGame.Logic.General
                 default:
                     break;
             }
-            foreach (Piece piece in pieces)
+            foreach (Piece piece in piecesList)
             {
                 if (piece is Pawn pawn && piece.Color == player)
                 {
@@ -404,11 +483,11 @@ namespace ChessGame.Logic.General
             }
         }
 
-        public List<Square> Check()
+        public List<Square> CastlingCheck()
         {
             List<Square> freeSquares = new List<Square>();
 
-            foreach (Piece piece in pieces)
+            foreach (Piece piece in piecesList)
             {
                 if (piece.Color != player)
                 {
@@ -416,7 +495,7 @@ namespace ChessGame.Logic.General
                 }
             }
 
-            foreach(Square square in squares)
+            foreach(Square square in squaresList)
             {
                 if ((square.BackColor == BACKGROUND_COLOR || square.BackColor == CONTRAST_COLOR) &&
                     (GetPiece(square.Position) == null || GetPiece(square.Position) is King))
@@ -434,7 +513,7 @@ namespace ChessGame.Logic.General
         {
             List<Rook> rooks = new List<Rook>();
 
-            foreach (Piece piece in pieces)
+            foreach (Piece piece in piecesList)
             {
                 if (piece is Rook rook && piece.Color == player && !piece.Moved)
                 {

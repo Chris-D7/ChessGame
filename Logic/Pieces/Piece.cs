@@ -34,7 +34,7 @@ namespace ChessGame.Logic.Pieces
 
         public virtual void ClickOn(object sender, EventArgs e)
         {
-            if (board.player == Color)
+            if (board.player == Color && !board.getPawnPromotionHappening())
             {
                 Piece piece = (Piece)sender;
                 piece.board.BoardDrawing();
