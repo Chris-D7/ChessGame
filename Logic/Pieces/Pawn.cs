@@ -6,6 +6,7 @@ namespace ChessGame.Logic.Pieces
     {
         public override Position Position { get; set; }
         public override Player Color { get; }
+        public override PieceType Type { get; }
         private readonly Direction face;
         private bool firstBurst = false;
 
@@ -13,6 +14,7 @@ namespace ChessGame.Logic.Pieces
         {
             Color = color;
             Position = position;
+            Type = PieceType.Pawn;
             if (Color == Player.White)
             {
                 face = Direction.Up;
@@ -33,7 +35,7 @@ namespace ChessGame.Logic.Pieces
             {
                 Position position = this.Position + (k * face);
                 Square square = board.GetSquare(position);
-                if (square != null)
+                if (square != null && square.Legal)
                 {
                     if (square.Controls.Count > 0)
                     {
@@ -49,7 +51,7 @@ namespace ChessGame.Logic.Pieces
             PrintAttack(changeHandles);
         }
 
-        public override void PrintAttack(bool changeHandles)
+        public void PrintAttack(bool changeHandles)
         {
             Direction directionRight, directionLeft;
             if (face == Direction.Up)
@@ -67,32 +69,40 @@ namespace ChessGame.Logic.Pieces
             Square squareRight = board.GetSquare(positionRight);
             Square squareLeft = board.GetSquare(positionLeft);
 
-            if (squareLeft != null && squareLeft.Controls.Count > 0)
+            if (changeHandles)
             {
-                Piece attack = board.GetPiece(positionLeft);
-                if (attack != null && attack.Color != this.Color)
+                if (squareLeft != null && squareLeft.Controls.Count > 0 && squareLeft.Legal)
                 {
-                    squareLeft.BackColor = Board.ATTACK_COLOR;
-                    if (changeHandles)
+                    Piece attack = board.GetPiece(positionLeft);
+                    if (attack != null && attack.Color != this.Color)
                     {
+                        squareLeft.BackColor = Board.ATTACK_COLOR;
+                        attack.Attack = true;
+                        attack.Click -= attack.ClickOn;
+                        attack.Click += attack.AttackClick;
+                    }
+                }
+                if (squareRight != null && squareRight.Controls.Count > 0 && squareRight.Legal)
+                {
+                    Piece attack = board.GetPiece(positionRight);
+                    if (attack != null && attack.Color != this.Color)
+                    {
+                        squareRight.BackColor = Board.ATTACK_COLOR;
                         attack.Attack = true;
                         attack.Click -= attack.ClickOn;
                         attack.Click += attack.AttackClick;
                     }
                 }
             }
-            if (squareRight != null && squareRight.Controls.Count > 0)
+            else
             {
-                Piece attack = board.GetPiece(positionRight);
-                if (attack != null && attack.Color != this.Color)
+                if (squareLeft != null && squareLeft.Legal)
+                {
+                    squareLeft.BackColor = Board.ATTACK_COLOR;
+                }
+                if (squareRight != null && squareRight.Legal)
                 {
                     squareRight.BackColor = Board.ATTACK_COLOR;
-                    if (changeHandles)
-                    {
-                        attack.Attack = true;
-                        attack.Click -= attack.ClickOn;
-                        attack.Click += attack.AttackClick;
-                    }
                 }
             }
             if (Moved)
@@ -136,7 +146,7 @@ namespace ChessGame.Logic.Pieces
         {
             Position moveTo = position + face;
             Square moveToSquare = board.GetSquare(moveTo);
-            if (moveToSquare != null)
+            if (moveToSquare != null && moveToSquare.Legal)
             {
                 moveToSquare.BackColor = Board.PASSANT_COLOR;
                 if (changeHandles)

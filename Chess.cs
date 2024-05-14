@@ -8,7 +8,8 @@ namespace ChessGame
         public Chess()
         {
             InitializeComponent();
-            this.Controls.Add(new Board());
+            Board board = new Board();
+            this.Controls.Add(board);
         }
     }
 }

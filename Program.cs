@@ -15,5 +15,15 @@ namespace ChessGame
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Chess());
         }
+
+        public static void Restart()
+        {
+            Application.Restart();
+        }
+
+        public static void Exit()
+        {
+            Application.Exit();
+        }
     }
 }

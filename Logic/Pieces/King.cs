@@ -8,6 +8,7 @@ namespace ChessGame.Logic.Pieces
     {
         public override Position Position { get; set; }
         public override Player Color { get; }
+        public override PieceType Type { get; }
         private readonly Direction[] directions = {
             Direction.Up, Direction.Down, Direction.Left, Direction.Right,
             Direction.UpRight, Direction.UpLeft, Direction.DownRight, Direction.DownLeft
@@ -17,6 +18,7 @@ namespace ChessGame.Logic.Pieces
         {
             Color = color;
             Position = position;
+            Type = PieceType.King;
             if (Color == Player.White)
             {
                 this.Image = Properties.Resources.WhiteKing;
@@ -37,93 +39,102 @@ namespace ChessGame.Logic.Pieces
                 Square square = board.GetSquare(position);
                 if (square != null)
                 {
-                    if (square.Controls.Count > 0)
+                    if (square.Legal)
                     {
-                        Piece attack = board.GetPiece(square.Position);
-                        if (attack.Color != this.Color)
+                        if (square.Controls.Count > 0)
                         {
-                            square.BackColor = Board.ATTACK_COLOR;
+                            Piece attack = board.GetPiece(square.Position);
+                            if (attack.Color != this.Color)
+                            {
+                                square.BackColor = Board.ATTACK_COLOR;
+                                if (changeHandles)
+                                {
+                                    attack.Attack = true;
+                                    attack.Click -= attack.ClickOn;
+                                    attack.Click += attack.AttackClick;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            square.BackColor = ((position.Row + position.Column) % 2 == 0) ? Board.MOVE_CONTRAST_COLOR : Board.MOVE_BACKGROUND_COLOR;
                             if (changeHandles)
                             {
-                                attack.Attack = true;
-                                attack.Click -= attack.ClickOn;
-                                attack.Click += attack.AttackClick;
+                                board.SetSquareHandleClick(square, SquareHandle.Move);
                             }
                         }
                     }
-                    else
-                    {
-                        square.BackColor = ((position.Row + position.Column) % 2 == 0) ? Board.MOVE_CONTRAST_COLOR : Board.MOVE_BACKGROUND_COLOR;
-                        if (changeHandles)
-                        {
-                            board.SetSquareHandleClick(square, SquareHandle.Move);
-                        }
-                    }
-
                 }
                 index++;
             }
         }
 
-        public void PrintCastling()
+        public void PrintCastling(bool changeHandles = true)
         {
             if (!this.Moved)
             {
                 List<Rook> rooks = board.CastlingGetRooks();
-                List<Square> freeSquares = board.CastlingCheck();
-                if (freeSquares.Contains(board.GetSquare(this.Position)))
+                if (board.GetSquare(this.Position).Legal)
                 {
                     if (rooks.Count == 1)
                     {
                         if (rooks[0].Position.Row == 0)
                         {
-                            DetermineCastlingSquares(freeSquares, Direction.Left);
+                            DetermineCastlingSquares(Direction.Left, changeHandles);
                         }
                         else
                         {
-                            DetermineCastlingSquares(freeSquares, Direction.Right);
+                            DetermineCastlingSquares(Direction.Right, changeHandles);
                         }
                     }
                     else if (rooks.Count == 2)
                     {
-                        DetermineCastlingSquares(freeSquares, Direction.Left);
-                        DetermineCastlingSquares(freeSquares, Direction.Right);
+                        DetermineCastlingSquares(Direction.Left, changeHandles);
+                        DetermineCastlingSquares(Direction.Right, changeHandles);
                     }
                 }
             }
         }
 
-        private void DetermineCastlingSquares(List<Square> freeSquares, Direction direction)
+        private void DetermineCastlingSquares(Direction direction, bool changeHandles)
         {
             Square square1 = board.GetSquare(this.Position + (2 * direction));
             Square square2 = board.GetSquare(this.Position + direction);
-            if(direction == Direction.Left)
+            if (direction == Direction.Left)
             {
                 Piece square3Piece = board.GetPiece(this.Position + 3 * direction);
-                if (freeSquares.Contains(square1) && freeSquares.Contains(square2) && square3Piece == null)
+                if (square1.Legal && square2.Legal && square3Piece == null
+                    && square1.Controls.Count == 0 && square2.Controls.Count == 0)
                 {
                     square1.BackColor = Board.CASTLING_COLOR;
-                    board.SetSquareHandleClick(square1, SquareHandle.Castling);
+                    if (changeHandles)
+                    {
+                        board.SetSquareHandleClick(square1, SquareHandle.Castling);
+                    }
                 }
             }
             else
             {
-                if (freeSquares.Contains(square1) && freeSquares.Contains(square2))
+                if (square1.Legal && square2.Legal
+                    && square1.Controls.Count == 0 && square2.Controls.Count == 0)
                 {
                     square1.BackColor = Board.CASTLING_COLOR;
-                    board.SetSquareHandleClick(square1, SquareHandle.Castling);
+                    if (changeHandles)
+                    {
+                        board.SetSquareHandleClick(square1, SquareHandle.Castling);
+                    }
                 }
             }
-
         }
 
         public override void ClickOn(object sender, EventArgs e)
         {
-            if (board.player == Color && !board.getPawnPromotionHappening())
+            if (board.player == Color && !board.GetPawnPromotionHappening())
             {
-                board.BoardDrawing();
-                PrintCastling();
                 Piece piece = (Piece)sender;
+                board.BoardDrawing();
+                board.DetermineLegalMovesForKing(piece);
+                PrintCastling();
                 Position position = piece.Position;
                 piece.board.SetActivePosition(position);
                 Square square = piece.board.GetSquare(position);
