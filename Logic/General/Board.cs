@@ -789,6 +789,10 @@ namespace ChessGame.Logic.General
                         square.Legal = false;
                     }
                 }
+                else if (square.BackColor == ATTACK_COLOR)
+                {
+                    square.BackColor = ((square.Position.Row + square.Position.Column) % 2 == 0) ? Board.CONTRAST_COLOR : Board.BACKGROUND_COLOR;
+                }
                 Color color = square.BackColor;
                 if ((color == MOVE_BACKGROUND_COLOR
                     || color == MOVE_CONTRAST_COLOR
